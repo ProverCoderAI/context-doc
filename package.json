@@ -5,8 +5,9 @@
   "type": "module",
   "scripts": {
     "start": "tsx src/main.ts",
-    "lint": "npx @ton-ai-core/vibecode-linter@latest src/",
-    "test": "vitest run --passWithNoTests"
+    "lint": "npx --no-install @ton-ai-core/vibecode-linter src/",
+    "test": "npx --no-install @ton-ai-core/vibecode-linter tests/ && vitest run --passWithNoTests",
+    "sync:knowledge": "tsx src/shell/syncKnowledge.ts"
   },
   "repository": {
     "type": "git",
@@ -23,7 +24,8 @@
     "@effect/schema": "^0.75.5",
     "effect": "^3.19.6",
     "ts-morph": "^27.0.2",
-    "ts-pattern": "^5.9.0"
+    "ts-pattern": "^5.9.0",
+    "vite-tsconfig-paths": "^5.1.4"
   },
   "devDependencies": {
     "@biomejs/biome": "^2.3.7",
