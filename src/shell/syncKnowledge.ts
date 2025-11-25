@@ -29,6 +29,8 @@ export interface SyncOptions {
 	readonly cwd: string;
 	readonly sourceDir?: string;
 	readonly destinationDir?: string;
+	readonly repositoryUrlOverride?: string;
+	readonly metaRoot?: string;
 }
 
 const syncError = (pathValue: string, reason: string): SyncError => ({
@@ -37,9 +39,16 @@ const syncError = (pathValue: string, reason: string): SyncError => ({
 	reason,
 });
 
-const readRepositoryUrl = (cwd: string): Effect.Effect<string, SyncError> =>
+const readRepositoryUrl = (
+	cwd: string,
+	repositoryUrlOverride?: string,
+): Effect.Effect<string, SyncError> =>
 	Effect.try({
 		try: () => {
+			if (repositoryUrlOverride !== undefined) {
+				return repositoryUrlOverride;
+			}
+
 			const raw = fs.readFileSync(path.join(cwd, "package.json"), "utf8");
 			const parsed = decodePackageFile(raw);
 			const repositoryUrl = parsed.repository?.url;
@@ -56,13 +65,26 @@ const readRepositoryUrl = (cwd: string): Effect.Effect<string, SyncError> =>
 const resolveSourceDir = (
 	cwd: string,
 	override?: string,
+	metaRoot?: string,
 ): Effect.Effect<string, SyncError> =>
 	Effect.try({
 		try: () => {
 			const envSource = process.env.CODEX_SOURCE_DIR;
+			const metaCandidate =
+				metaRoot === undefined
+					? undefined
+					: metaRoot.endsWith(".codex")
+						? metaRoot
+						: path.join(metaRoot, ".codex");
 			const localSource = path.join(cwd, ".codex");
 			const homeSource = path.join(os.homedir(), ".codex");
-			const candidates = [override, envSource, localSource, homeSource];
+			const candidates = [
+				override,
+				envSource,
+				metaCandidate,
+				localSource,
+				homeSource,
+			];
 			const existing = candidates.find(
 				(candidate) => candidate !== undefined && fs.existsSync(candidate),
 			);
@@ -171,8 +193,12 @@ const selectRelevantFiles = (
  */
 export const buildSyncProgram = (options: SyncOptions): Effect.Effect<void, SyncError> =>
 	Effect.gen(function* (_) {
-		const repositoryUrl = yield* _(readRepositoryUrl(options.cwd));
-		const sourceDir = yield* _(resolveSourceDir(options.cwd, options.sourceDir));
+		const repositoryUrl = yield* _(
+			readRepositoryUrl(options.cwd, options.repositoryUrlOverride),
+		);
+		const sourceDir = yield* _(
+			resolveSourceDir(options.cwd, options.sourceDir, options.metaRoot),
+		);
 		const destinationDir =
 			options.destinationDir ?? path.join(options.cwd, ".knowledge", ".codex");
 
@@ -207,10 +233,52 @@ const isMainModule = (): boolean => {
 	return import.meta.url === pathToFileURL(entry).href;
 };
 
-if (isMainModule()) {
-	const program = buildSyncProgram({
+const parseArgs = (): SyncOptions => {
+	const argv = process.argv.slice(2);
+	let sourceDir: string | undefined;
+	let destinationDir: string | undefined;
+	let repositoryUrlOverride: string | undefined;
+	let metaRoot: string | undefined;
+
+	for (let i = 0; i < argv.length; i++) {
+		const arg = argv[i];
+
+		switch (arg) {
+			case "--source":
+			case "-s":
+				sourceDir = argv[i + 1];
+				i++;
+				break;
+			case "--dest":
+			case "-d":
+				destinationDir = argv[i + 1];
+				i++;
+				break;
+			case "--project-url":
+			case "--project-name":
+				repositoryUrlOverride = argv[i + 1];
+				i++;
+				break;
+			case "--meta-root":
+				metaRoot = argv[i + 1];
+				i++;
+				break;
+			default:
+				break;
+		}
+	}
+
+	return {
 		cwd: process.cwd(),
-	});
+		sourceDir,
+		destinationDir,
+		repositoryUrlOverride,
+		metaRoot,
+	};
+};
+
+if (isMainModule()) {
+	const program = buildSyncProgram(parseArgs());
 
 	Effect.runSync(program);
 }
