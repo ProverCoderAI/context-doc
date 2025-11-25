@@ -5,9 +5,8 @@
   "type": "module",
   "scripts": {
     "start": "tsx src/main.ts",
-    "lint": "eslint .",
-    "test": "vitest run --passWithNoTests",
-    "check": "tsc --noEmit"
+    "lint": "npx @ton-ai-core/vibecode-linter@latest src/",
+    "test": "vitest run --passWithNoTests"
   },
   "repository": {
     "type": "git",
