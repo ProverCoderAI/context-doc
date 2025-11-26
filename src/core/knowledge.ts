@@ -107,24 +107,12 @@ const metadataMatches = (
 	metadata: RecordMetadata,
 	locator: ProjectLocator,
 ): boolean => {
-	const fallbackCwdOnly =
-		locator.normalizedRepositoryUrl === locator.normalizedCwd;
-
-	const repoMatches = Option.exists(
-		metadata.repositoryUrl,
-		(repositoryUrl) =>
-			normalizeRepositoryUrl(repositoryUrl) === locator.normalizedRepositoryUrl,
-	);
-
 	const cwdMatches = Option.exists(metadata.cwd, (cwdValue) => {
 		const normalized = normalizeCwd(cwdValue);
-		return fallbackCwdOnly
-			? normalized === locator.normalizedCwd
-			: locator.normalizedCwd.startsWith(normalized) ||
-					normalized.startsWith(locator.normalizedCwd);
+		return normalized === locator.normalizedCwd;
 	});
 
-	return repoMatches || cwdMatches;
+	return cwdMatches;
 };
 
 export const buildProjectLocator = (
