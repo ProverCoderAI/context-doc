@@ -2,9 +2,9 @@ import { createHash } from "node:crypto";
 import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
-import { Console, Effect, pipe } from "effect";
-import { copyFilteredFiles, ensureDirectory, syncError } from "./syncShared.js";
-import type { SyncError, SyncOptions } from "./syncTypes.js";
+import { Effect } from "effect";
+import { copyFilteredFiles, runSyncSource, syncError } from "./syncShared.js";
+import type { SyncError, SyncOptions, SyncSource } from "./syncTypes.js";
 
 const qwenHashFromPath = (projectPath: string): string =>
 	createHash("sha256").update(projectPath).digest("hex");
@@ -56,41 +56,18 @@ const resolveQwenSourceDir = (
 
 export const syncQwen = (
 	options: SyncOptions,
-): Effect.Effect<void, SyncError> =>
-	pipe(
-		resolveQwenSourceDir(options.cwd, options.qwenSourceDir, options.metaRoot),
-		Effect.flatMap((qwenSource) =>
-			Effect.gen(function* (_) {
-				const destination = path.join(options.cwd, ".knowledge", ".qwen");
-				if (path.resolve(qwenSource) === path.resolve(destination)) {
-					yield* _(
-						Console.log(
-							"Qwen source equals destination; skipping copy to avoid duplicates",
-						),
-					);
-					return;
-				}
+): Effect.Effect<void, SyncError> => runSyncSource(qwenSource, options);
 
-				yield* _(ensureDirectory(destination));
-				const qwenRoot = path.dirname(path.dirname(qwenSource));
-				const copiedCount = yield* _(
-					copyFilteredFiles(
-						qwenSource,
-						destination,
-						(entry, fullPath) => entry.isFile() && fullPath.endsWith(".json"),
-						"Cannot traverse Qwen directory",
-					),
-				);
-				yield* _(
-					Console.log(
-						`Qwen: copied ${copiedCount} files from ${qwenRoot} to ${destination}`,
-					),
-				);
-			}),
+const qwenSource: SyncSource = {
+	name: "Qwen",
+	destSubdir: ".qwen",
+	resolveSource: (options) =>
+		resolveQwenSourceDir(options.cwd, options.qwenSourceDir, options.metaRoot),
+	copy: (sourceDir, destinationDir) =>
+		copyFilteredFiles(
+			sourceDir,
+			destinationDir,
+			(entry, fullPath) => entry.isFile() && fullPath.endsWith(".json"),
+			"Cannot traverse Qwen directory",
 		),
-		Effect.catchAll((error) =>
-			Console.log(
-				`Qwen source not found; skipped syncing Qwen dialog files (${error.reason})`,
-			),
-		),
-	);
+};

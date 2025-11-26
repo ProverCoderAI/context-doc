@@ -26,8 +26,8 @@ export const runSyncSource = (
 	options: SyncOptions,
 ): Effect.Effect<void, SyncError> =>
 	pipe(
-		source.resolveSource(options),
-		Effect.flatMap((resolvedSource: string) => {
+		Effect.gen(function* (_) {
+			const resolvedSource = yield* _(source.resolveSource(options));
 			const destination = path.join(
 				options.cwd,
 				".knowledge",
@@ -35,18 +35,21 @@ export const runSyncSource = (
 			);
 
 			if (path.resolve(resolvedSource) === path.resolve(destination)) {
-				return Console.log(
-					`${source.name}: source equals destination; skipping copy to avoid duplicates`,
+				yield* _(
+					Console.log(
+						`${source.name}: source equals destination; skipping copy to avoid duplicates`,
+					),
 				);
+				return;
 			}
 
-			return pipe(
-				ensureDirectory(destination),
-				Effect.flatMap(() => source.copy(resolvedSource, destination, options)),
-				Effect.flatMap((copied: number) =>
-					Console.log(
-						`${source.name}: copied ${copied} files from ${resolvedSource} to ${destination}`,
-					),
+			yield* _(ensureDirectory(destination));
+			const copied = yield* _(
+				source.copy(resolvedSource, destination, options),
+			);
+			yield* _(
+				Console.log(
+					`${source.name}: copied ${copied} files from ${resolvedSource} to ${destination}`,
 				),
 			);
 		}),

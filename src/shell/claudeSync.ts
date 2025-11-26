@@ -1,9 +1,9 @@
 import * as NodeFs from "node:fs";
 import * as NodeOs from "node:os";
 import * as NodePath from "node:path";
-import { Console, Effect, pipe } from "effect";
-import { copyFilteredFiles, ensureDirectory, syncError } from "./syncShared.js";
-import type { SyncError, SyncOptions } from "./syncTypes.js";
+import { Effect, pipe } from "effect";
+import { copyFilteredFiles, runSyncSource, syncError } from "./syncShared.js";
+import type { SyncError, SyncOptions, SyncSource } from "./syncTypes.js";
 
 const slugFromCwd = (cwd: string): string =>
 	`-${cwd.replace(/^\/+/, "").replace(/\//g, "-")}`;
@@ -43,28 +43,13 @@ const copyClaudeJsonl = (
 
 export const syncClaude = (
 	options: SyncOptions,
-): Effect.Effect<void, SyncError> =>
-	pipe(
+): Effect.Effect<void, SyncError> => runSyncSource(claudeSource, options);
+
+const claudeSource: SyncSource = {
+	name: "Claude",
+	destSubdir: ".claude",
+	resolveSource: (options) =>
 		resolveClaudeProjectDir(options.cwd, options.claudeProjectsRoot),
-		Effect.flatMap((sourceDir) =>
-			pipe(
-				ensureDirectory(NodePath.join(options.cwd, ".knowledge", ".claude")),
-				Effect.flatMap(() =>
-					copyClaudeJsonl(
-						sourceDir,
-						NodePath.join(options.cwd, ".knowledge", ".claude"),
-					),
-				),
-				Effect.flatMap((copied) =>
-					Console.log(
-						`Claude: copied ${copied} files from ${sourceDir} to ${NodePath.join(options.cwd, ".knowledge", ".claude")}`,
-					),
-				),
-			),
-		),
-		Effect.catchAll((error: SyncError) =>
-			Console.log(
-				`Claude source not found; skipped syncing Claude dialog files (${error.reason})`,
-			),
-		),
-	);
+	copy: (sourceDir, destinationDir) =>
+		copyClaudeJsonl(sourceDir, destinationDir),
+};

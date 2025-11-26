@@ -1,5 +1,4 @@
 import type * as Fx from "effect";
-import type { Effect } from "effect";
 
 export interface SyncError {
 	readonly _tag: "SyncError";
@@ -17,15 +16,15 @@ export interface SyncOptions {
 	readonly claudeProjectsRoot?: string;
 }
 
+type SyncEffect<A> = Fx.Effect.Effect<A, SyncError>;
+
 export interface SyncSource {
 	readonly name: string;
 	readonly destSubdir: ".codex" | ".qwen" | ".claude";
-	readonly resolveSource: (
-		options: SyncOptions,
-	) => Effect<string, SyncError>;
+	readonly resolveSource: (options: SyncOptions) => SyncEffect<string>;
 	readonly copy: (
 		sourceDir: string,
 		destinationDir: string,
 		options: SyncOptions,
-	) => Effect<number, SyncError>;
+	) => SyncEffect<number>;
 }
