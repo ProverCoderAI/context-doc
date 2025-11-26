@@ -1,8 +1,8 @@
+import { Console, Effect, pipe } from "effect";
 import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
-import { Console, Effect, pipe } from "effect";
-import { ensureDirectory, syncError } from "./syncShared.js";
+import { copyFilteredFiles, ensureDirectory, syncError } from "./syncShared.js";
 import type { SyncError, SyncOptions } from "./syncTypes.js";
 
 const slugFromCwd = (cwd: string): string =>
@@ -33,31 +33,12 @@ const copyClaudeJsonl = (
 	sourceDir: string,
 	destinationDir: string,
 ): Effect.Effect<number, SyncError> =>
-	Effect.try({
-		try: () => {
-			let copied = 0;
-			const walk = (current: string): void => {
-				const entries = fs.readdirSync(current, { withFileTypes: true });
-				for (const entry of entries) {
-					const full = path.join(current, entry.name);
-					if (entry.isDirectory()) {
-						walk(full);
-					} else if (entry.isFile() && entry.name.endsWith(".jsonl")) {
-						const target = path.join(
-							destinationDir,
-							path.relative(sourceDir, full),
-						);
-						fs.mkdirSync(path.dirname(target), { recursive: true });
-						fs.copyFileSync(full, target);
-						copied += 1;
-					}
-				}
-			};
-			walk(sourceDir);
-			return copied;
-		},
-		catch: () => syncError(sourceDir, "Cannot traverse Claude project"),
-	});
+	copyFilteredFiles(
+		sourceDir,
+		destinationDir,
+		(entry, fullPath) => entry.isFile() && fullPath.endsWith(".jsonl"),
+		"Cannot traverse Claude project",
+	);
 
 export const syncClaude = (
 	options: SyncOptions,

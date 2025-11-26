@@ -3,34 +3,8 @@ import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
 import { Console, Effect, pipe } from "effect";
-import { ensureDirectory, syncError } from "./syncShared.js";
+import { copyFilteredFiles, ensureDirectory, syncError } from "./syncShared.js";
 import type { SyncError, SyncOptions } from "./syncTypes.js";
-
-const copyDirectoryJsonOnly = (
-	sourceRoot: string,
-	destinationRoot: string,
-): Effect.Effect<number, SyncError> =>
-	Effect.try({
-		try: () => {
-			let copied = 0;
-			fs.cpSync(sourceRoot, destinationRoot, {
-				recursive: true,
-				filter: (src) => {
-					const stat = fs.statSync(src);
-					if (stat.isDirectory()) {
-						return true;
-					}
-					if (src.endsWith(".json")) {
-						copied += 1;
-						return true;
-					}
-					return false;
-				},
-			});
-			return copied;
-		},
-		catch: () => syncError(sourceRoot, "Cannot traverse Qwen directory"),
-	});
 
 const qwenHashFromPath = (projectPath: string): string =>
 	createHash("sha256").update(projectPath).digest("hex");
@@ -100,7 +74,12 @@ export const syncQwen = (
 				yield* _(ensureDirectory(destination));
 				const qwenRoot = path.dirname(path.dirname(qwenSource));
 				const copiedCount = yield* _(
-					copyDirectoryJsonOnly(qwenSource, destination),
+					copyFilteredFiles(
+						qwenSource,
+						destination,
+						(entry, fullPath) => entry.isFile() && fullPath.endsWith(".json"),
+						"Cannot traverse Qwen directory",
+					),
 				);
 				yield* _(
 					Console.log(
