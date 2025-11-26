@@ -9,7 +9,6 @@
 		// EMIT OVERRIDES (build-only)
 		// ═══════════════════════════════════════════════════════════════════════════
 		"noEmit": false,
-		"preserveShebang": true,
 		"outDir": "dist",
 		"rootDir": "src",
 		"tsBuildInfoFile": "dist/.tsbuildinfo"
