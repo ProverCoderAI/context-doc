@@ -8,7 +8,8 @@
     "build": "tsc -p tsconfig.build.json",
     "lint": "npx --no-install @ton-ai-core/vibecode-linter src/",
     "test": "npx --no-install @ton-ai-core/vibecode-linter tests/ && vitest run --passWithNoTests",
-    "sync:knowledge": "tsx src/shell/syncKnowledge.ts"
+    "sync:knowledge": "tsx src/shell/syncKnowledge.ts",
+		"release": "npm run build && npm run lint && npm version patch && npm publish --access public"
   },
   "repository": {
     "type": "git",
