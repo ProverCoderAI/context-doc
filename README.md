@@ -1,6 +1,12 @@
 # Knowledge Sync CLI
 
-Command: `npm run sync:knowledge` (or `tsx src/shell/syncKnowledge.ts`) — copies project dialogs into `.knowledge` for both Codex and Qwen.
+Command: `npm run sync:knowledge` (or `knowledge-sync` when installed globally) — copies project dialogs into `.knowledge` for both Codex and Qwen.
+
+## Installation (global CLI)
+- Install: `npm install -g @prover-coder-ai/context-doc`
+- Registry page: https://www.npmjs.com/package/@prover-coder-ai/context-doc
+- Run globally: `knowledge-sync [flags]`
+- Local (without global install): `npm run sync:knowledge` or `tsx src/shell/syncKnowledge.ts`
 
 ## Flags
 - `--source, -s <path>` — explicit path to `.codex` (Codex source).
