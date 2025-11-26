@@ -8,7 +8,7 @@
     "build": "tsc -p tsconfig.build.json",
     "lint": "npx --no-install @ton-ai-core/vibecode-linter src/",
     "test": "npx --no-install @ton-ai-core/vibecode-linter tests/ && vitest run --passWithNoTests",
-    "sync:knowledge": "npm run build && PKG=prover-coder-ai-context-doc-$(node -p \"require('./package.json').version\").tgz && rm -f \"$PKG\" && npm pack >/dev/null && npx -p \"./$PKG\" context-doc",
+    "sync:knowledge": "npm run build && PKG=prover-coder-ai-context-doc-$(node -p \"require('./package.json').version\").tgz && rm -f \"$PKG\" && npm pack >/dev/null && npx -y -p \"./$PKG\" context-doc",
     "release": "npm run build && npm run lint && npm version patch && npm publish --access public"
   },
   "bin": {
