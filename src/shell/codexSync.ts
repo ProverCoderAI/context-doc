@@ -160,7 +160,9 @@ const resolveLocator = (
 ): Effect.Effect<ProjectLocator, SyncError> =>
 	pipe(
 		readRepositoryUrl(options.cwd, options.repositoryUrlOverride),
-		Effect.map((repositoryUrl) => buildProjectLocator(repositoryUrl, options.cwd)),
+		Effect.map((repositoryUrl) =>
+			buildProjectLocator(repositoryUrl, options.cwd),
+		),
 		Effect.catchAll(() =>
 			Effect.gen(function* (__) {
 				yield* __(
