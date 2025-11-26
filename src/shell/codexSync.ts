@@ -56,20 +56,17 @@ const resolveSourceDir = (
 						? metaRoot
 						: path.join(metaRoot, ".codex");
 			const localSource = path.join(cwd, ".codex");
-			const localKnowledge = path.join(cwd, ".knowledge", ".codex");
 			const homeSource = path.join(os.homedir(), ".codex");
-			const homeKnowledge = path.join(
-				os.homedir(),
-				".knowledge",
-				".codex",
-			);
+			const localKnowledge = path.join(cwd, ".knowledge", ".codex");
+			const homeKnowledge = path.join(os.homedir(), ".knowledge", ".codex");
+
 			const candidates = [
 				override,
 				envSource,
 				metaCandidate,
 				localSource,
-				localKnowledge,
 				homeSource,
+				localKnowledge,
 				homeKnowledge,
 			].filter((candidate): candidate is string => candidate !== undefined);
 
