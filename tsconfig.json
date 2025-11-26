@@ -77,8 +77,10 @@
 		// ═══════════════════════════════════════════════════════════════════════════
 		// OUTPUT CONFIGURATION
 		// ═══════════════════════════════════════════════════════════════════════════
-		// NOTE: Moved emission-related options to project configs (tsconfig.src.json, tsconfig.test.json)
-		// WHY: Root (solution) tsconfig must not define outDir/tsBuildInfoFile to avoid TS6377 collisions
+		// CHANGE: Disable emit in base config; dedicated build config handles dist output
+		// WHY: Prevent stray .js artifacts in source tree, route builds through tsconfig.build.json
+		// NOTE: Root (solution) tsconfig must not define outDir/tsBuildInfoFile to avoid TS6377 collisions
+		"noEmit": true,
 
 		// ═══════════════════════════════════════════════════════════════════════════
 		// PATH RESOLUTION

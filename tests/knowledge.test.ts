@@ -1,3 +1,4 @@
+import { createHash } from "node:crypto";
 import fs from "node:fs";
 import path from "node:path";
 import { Effect } from "effect";
@@ -72,12 +73,15 @@ describe("shell: syncKnowledge end-to-end", () => {
 	let cwd: string;
 	let codexDir: string;
 	let destDir: string;
+	let qwenSource: string;
 	const repoUrl = "https://github.com/ProverCoderAI/context-doc";
 
 	beforeEach(() => {
 		cwd = mkTempDir();
 		codexDir = path.join(cwd, ".codex");
 		destDir = path.join(cwd, ".knowledge", ".codex");
+		const qwenHash = createHash("sha256").update(cwd).digest("hex");
+		qwenSource = path.join(cwd, ".qwen", "tmp");
 
 		writeFile(
 			path.join(cwd, "package.json"),
@@ -98,6 +102,11 @@ describe("shell: syncKnowledge end-to-end", () => {
 				'{"git":{"repository_url":"https://github.com/other/repo"},"cwd":"/tmp/other","message":"skip"}',
 			].join("\n"),
 		);
+
+		writeFile(
+			path.join(qwenSource, qwenHash, "chats", "session-1.json"),
+			JSON.stringify({ sessionId: "s1", projectHash: qwenHash }),
+		);
 	});
 
 	afterEach(() => {
@@ -109,6 +118,7 @@ describe("shell: syncKnowledge end-to-end", () => {
 			cwd,
 			sourceDir: codexDir,
 			destinationDir: destDir,
+			qwenSourceDir: qwenSource,
 		});
 
 		Effect.runSync(program);
@@ -129,5 +139,9 @@ describe("shell: syncKnowledge end-to-end", () => {
 
 		expect(content).toContain('"message":"match"');
 		expect(content).not.toContain("skip");
+
+		const qwenCopiedRoot = path.join(destDir, "..", ".qwen");
+		const qwenSubdirs = fs.readdirSync(qwenCopiedRoot, { withFileTypes: true });
+		expect(qwenSubdirs.length).toBeGreaterThan(0);
 	});
 });

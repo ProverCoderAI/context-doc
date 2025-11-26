@@ -1,0 +1,30 @@
+{
+  "sessionId": "26f1d537-cf47-439a-ac55-bff8a1e02aa6",
+  "projectHash": "86890e2d712aa2edf903aa005cca7c974eef2d670a929661b3ae8f65a1ff578c",
+  "startTime": "2025-11-25T17:43:06.421Z",
+  "lastUpdated": "2025-11-25T17:43:11.072Z",
+  "messages": [
+    {
+      "id": "68c584e7-d70b-4bb2-9964-944df5e87e30",
+      "timestamp": "2025-11-25T17:43:06.421Z",
+      "type": "user",
+      "content": "Привет"
+    },
+    {
+      "id": "e339af91-0364-463a-a789-c33ebcbfa1a3",
+      "timestamp": "2025-11-25T17:43:11.072Z",
+      "type": "qwen",
+      "content": "Привет！Я могу помочь вам с проектом Qwen Code.Что бы вы хотели сделать сегодня?",
+      "thoughts": [],
+      "tokens": {
+        "input": 12254,
+        "output": 26,
+        "cached": 11958,
+        "thoughts": 0,
+        "tool": 0,
+        "total": 12280
+      },
+      "model": "coder-model"
+    }
+  ]
+}
