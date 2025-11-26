@@ -15,15 +15,16 @@ const resolveClaudeProjectDir = (
 	pipe(
 		Effect.sync(() => {
 			const slug = slugFromCwd(cwd);
-			const base = overrideProjectsRoot ?? path.join(os.homedir(), ".claude", "projects");
+			const base =
+				overrideProjectsRoot ?? path.join(os.homedir(), ".claude", "projects");
 			const candidate = path.join(base, slug);
-			return fs.existsSync(candidate)
-				? candidate
-				: undefined;
+			return fs.existsSync(candidate) ? candidate : undefined;
 		}),
 		Effect.flatMap((found) =>
 			found === undefined
-				? Effect.fail(syncError(".claude", "Claude project directory is missing"))
+				? Effect.fail(
+						syncError(".claude", "Claude project directory is missing"),
+					)
 				: Effect.succeed(found),
 		),
 	);
@@ -42,7 +43,10 @@ const copyClaudeJsonl = (
 					if (entry.isDirectory()) {
 						walk(full);
 					} else if (entry.isFile() && entry.name.endsWith(".jsonl")) {
-						const target = path.join(destinationDir, path.relative(sourceDir, full));
+						const target = path.join(
+							destinationDir,
+							path.relative(sourceDir, full),
+						);
 						fs.mkdirSync(path.dirname(target), { recursive: true });
 						fs.copyFileSync(full, target);
 						copied += 1;

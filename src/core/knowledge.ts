@@ -107,6 +107,9 @@ const metadataMatches = (
 	metadata: RecordMetadata,
 	locator: ProjectLocator,
 ): boolean => {
+	const fallbackCwdOnly =
+		locator.normalizedRepositoryUrl === locator.normalizedCwd;
+
 	const repoMatches = Option.exists(
 		metadata.repositoryUrl,
 		(repositoryUrl) =>
@@ -115,10 +118,10 @@ const metadataMatches = (
 
 	const cwdMatches = Option.exists(metadata.cwd, (cwdValue) => {
 		const normalized = normalizeCwd(cwdValue);
-		return (
-			locator.normalizedCwd.startsWith(normalized) ||
-			normalized.startsWith(locator.normalizedCwd)
-		);
+		return fallbackCwdOnly
+			? normalized === locator.normalizedCwd
+			: locator.normalizedCwd.startsWith(normalized) ||
+					normalized.startsWith(locator.normalizedCwd);
 	});
 
 	return repoMatches || cwdMatches;
