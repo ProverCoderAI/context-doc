@@ -56,19 +56,30 @@ const resolveSourceDir = (
 						? metaRoot
 						: path.join(metaRoot, ".codex");
 			const localSource = path.join(cwd, ".codex");
+			const localKnowledge = path.join(cwd, ".knowledge", ".codex");
 			const homeSource = path.join(os.homedir(), ".codex");
+			const homeKnowledge = path.join(
+				os.homedir(),
+				".knowledge",
+				".codex",
+			);
 			const candidates = [
 				override,
 				envSource,
 				metaCandidate,
 				localSource,
+				localKnowledge,
 				homeSource,
+				homeKnowledge,
 			].filter((candidate): candidate is string => candidate !== undefined);
 
 			const existing = candidates.find((candidate) => fs.existsSync(candidate));
 
 			return { existing, candidates };
 		}),
+		Effect.tap(({ candidates }) =>
+			Console.log(`Codex source candidates: ${candidates.join(", ")}`),
+		),
 		Effect.flatMap(({ existing, candidates }) =>
 			existing === undefined
 				? Effect.fail(
@@ -172,6 +183,15 @@ export const syncCodex = (
 		);
 		const destinationDir =
 			options.destinationDir ?? path.join(options.cwd, ".knowledge", ".codex");
+
+		if (path.resolve(sourceDir) === path.resolve(destinationDir)) {
+			yield* _(
+				Console.log(
+					"Codex source equals destination; skipping copy to avoid duplicates",
+				),
+			);
+			return;
+		}
 
 		yield* _(ensureDirectory(destinationDir));
 

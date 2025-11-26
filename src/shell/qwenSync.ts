@@ -49,15 +49,24 @@ const resolveQwenSourceDir = (
 				: metaRoot.endsWith(".qwen")
 					? metaRoot
 					: path.join(metaRoot, ".qwen");
+		const metaKnowledge = path.join(metaRoot ?? "", ".knowledge", ".qwen");
 		const homeBase = path.join(os.homedir(), ".qwen");
+		const homeKnowledge = path.join(os.homedir(), ".knowledge", ".qwen");
 
 		const candidates = [
 			override,
 			envSource,
 			baseFromMeta ? path.join(baseFromMeta, "tmp", hash) : undefined,
 			path.join(cwd, ".qwen", "tmp", hash),
+			path.join(cwd, ".knowledge", ".qwen", "tmp", hash),
+			metaKnowledge ? path.join(metaKnowledge, "tmp", hash) : undefined,
 			path.join(homeBase, "tmp", hash),
+			path.join(homeKnowledge, "tmp", hash),
 		].filter((candidate): candidate is string => candidate !== undefined);
+
+		yield* _(
+			Console.log(`Qwen source candidates: ${candidates.join(", ")}`),
+		);
 
 		const found = candidates.find((candidate) => fs.existsSync(candidate));
 
@@ -84,20 +93,27 @@ export const syncQwen = (
 			Console.log(`Qwen source resolved: ${qwenSource}`),
 		),
 		Effect.flatMap((qwenSource) =>
-			pipe(
-				ensureDirectory(path.join(options.cwd, ".knowledge", ".qwen")),
-				Effect.flatMap(() =>
-					copyDirectoryJsonOnly(
-						qwenSource,
-						path.join(options.cwd, ".knowledge", ".qwen"),
-					),
-				),
-				Effect.flatMap((copiedCount) =>
+			Effect.gen(function* (_) {
+				const destination = path.join(options.cwd, ".knowledge", ".qwen");
+				if (path.resolve(qwenSource) === path.resolve(destination)) {
+					yield* _(
+						Console.log(
+							"Qwen source equals destination; skipping copy to avoid duplicates",
+						),
+					);
+					return;
+				}
+
+				yield* _(ensureDirectory(destination));
+				const copiedCount = yield* _(
+					copyDirectoryJsonOnly(qwenSource, destination),
+				);
+				yield* _(
 					Console.log(
 						`Synced ${copiedCount} Qwen dialog files into .knowledge/.qwen`,
 					),
-				),
-			),
+				);
+			}),
 		),
 		Effect.catchAll((error) =>
 			Console.log(
