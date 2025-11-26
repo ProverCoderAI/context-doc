@@ -1,5 +1,6 @@
 #!/usr/bin/env node
 import { Effect } from "effect";
+import { syncClaude } from "./claudeSync.js";
 import { syncCodex } from "./codexSync.js";
 import { syncQwen } from "./qwenSync.js";
 import type { SyncError, SyncOptions } from "./syncTypes.js";
@@ -9,6 +10,7 @@ export const buildSyncProgram = (
 	options: SyncOptions,
 ): Effect.Effect<void, SyncError> =>
 	Effect.gen(function* (_) {
+		yield* _(syncClaude(options));
 		yield* _(syncCodex(options));
 		yield* _(syncQwen(options));
 	});
@@ -26,6 +28,7 @@ export const parseArgs = (): SyncOptions => {
 		"--project-name": "repositoryUrlOverride",
 		"--meta-root": "metaRoot",
 		"--qwen-source": "qwenSourceDir",
+		"--claude-projects": "claudeProjectsRoot",
 	};
 
 	for (let i = 0; i < argv.length; i++) {

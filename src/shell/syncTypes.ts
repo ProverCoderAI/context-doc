@@ -11,4 +11,5 @@ export interface SyncOptions {
 	readonly repositoryUrlOverride?: string;
 	readonly metaRoot?: string;
 	readonly qwenSourceDir?: string;
+	readonly claudeProjectsRoot?: string;
 }
