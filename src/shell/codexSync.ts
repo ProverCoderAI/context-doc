@@ -175,21 +175,21 @@ export const syncCodex = (
 
 		yield* _(ensureDirectory(destinationDir));
 
-	const locator = buildProjectLocator(repositoryUrl, options.cwd);
-	const allJsonlFiles = yield* _(collectJsonlFiles(sourceDir));
-	const relevantFiles = yield* _(selectRelevantFiles(allJsonlFiles, locator));
+		const locator = buildProjectLocator(repositoryUrl, options.cwd);
+		const allJsonlFiles = yield* _(collectJsonlFiles(sourceDir));
+		const relevantFiles = yield* _(selectRelevantFiles(allJsonlFiles, locator));
 
-	yield* _(
-		Effect.forEach(relevantFiles, (filePath) =>
-			copyRelevantFile(sourceDir, destinationDir, filePath),
-		),
-	);
+		yield* _(
+			Effect.forEach(relevantFiles, (filePath) =>
+				copyRelevantFile(sourceDir, destinationDir, filePath),
+			),
+		);
 
-	yield* _(
-		Console.log(
-			`Synced ${relevantFiles.length} dialog files into .knowledge/.codex from ${sourceDir}`,
-		),
-	);
+		yield* _(
+			Console.log(
+				`Synced ${relevantFiles.length} dialog files into .knowledge/.codex from ${sourceDir}`,
+			),
+		);
 	}).pipe(
 		Effect.catchAll((error) =>
 			Console.log(
