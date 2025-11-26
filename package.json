@@ -10,7 +10,7 @@
     "test": "npx --no-install @ton-ai-core/vibecode-linter tests/ && vitest run --passWithNoTests",
     "prepare": "git config core.hooksPath .githooks && chmod +x .githooks/pre-commit",
     "sync:knowledge": "npm run build && PKG=prover-coder-ai-context-doc-$(node -p \"require('./package.json').version\").tgz && rm -f \"$PKG\" && npm pack >/dev/null && npx -y -p \"./$PKG\" context-doc",
-    "release": "npm run build && npm run lint && npm version patch && npm publish --access public"
+    "release": "npm run lint && npm run build && npm version patch && npm publish --access public"
   },
   "bin": {
     "context-doc": "dist/shell/cli.js"

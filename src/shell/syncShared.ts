@@ -1,6 +1,7 @@
 import fs from "node:fs";
 import path from "node:path";
 import { Console, Effect } from "effect";
+import { pipe } from "effect/Function";
 import type { SyncError, SyncOptions, SyncSource } from "./syncTypes.js";
 
 export const syncError = (pathValue: string, reason: string): SyncError => ({
@@ -26,7 +27,7 @@ export const runSyncSource = (
 ): Effect.Effect<void, SyncError> =>
 	pipe(
 		source.resolveSource(options),
-		Effect.flatMap((resolvedSource) => {
+		Effect.flatMap((resolvedSource: string) => {
 			const destination = path.join(
 				options.cwd,
 				".knowledge",
@@ -41,10 +42,8 @@ export const runSyncSource = (
 
 			return pipe(
 				ensureDirectory(destination),
-				Effect.flatMap(() =>
-					source.copy(resolvedSource, destination, options),
-				),
-				Effect.flatMap((copied) =>
+				Effect.flatMap(() => source.copy(resolvedSource, destination, options)),
+				Effect.flatMap((copied: number) =>
 					Console.log(
 						`${source.name}: copied ${copied} files from ${resolvedSource} to ${destination}`,
 					),
