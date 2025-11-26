@@ -64,10 +64,6 @@ const resolveQwenSourceDir = (
 			path.join(homeKnowledge, "tmp", hash),
 		].filter((candidate): candidate is string => candidate !== undefined);
 
-		yield* _(
-			Console.log(`Qwen source candidates: ${candidates.join(", ")}`),
-		);
-
 		const found = candidates.find((candidate) => fs.existsSync(candidate));
 
 		if (found === undefined) {
@@ -89,9 +85,6 @@ export const syncQwen = (
 ): Effect.Effect<void, SyncError> =>
 	pipe(
 		resolveQwenSourceDir(options.cwd, options.qwenSourceDir, options.metaRoot),
-		Effect.tap((qwenSource) =>
-			Console.log(`Qwen source resolved: ${qwenSource}`),
-		),
 		Effect.flatMap((qwenSource) =>
 			Effect.gen(function* (_) {
 				const destination = path.join(options.cwd, ".knowledge", ".qwen");
@@ -109,9 +102,7 @@ export const syncQwen = (
 					copyDirectoryJsonOnly(qwenSource, destination),
 				);
 				yield* _(
-					Console.log(
-						`Synced ${copiedCount} Qwen dialog files into .knowledge/.qwen`,
-					),
+					Console.log(`Qwen: copied ${copiedCount} files from ${qwenSource} to ${destination}`),
 				);
 			}),
 		),

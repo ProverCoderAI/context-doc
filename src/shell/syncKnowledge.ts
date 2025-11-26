@@ -1,5 +1,4 @@
 #!/usr/bin/env node
-import { pathToFileURL } from "node:url";
 import { Effect } from "effect";
 import { syncCodex } from "./codexSync.js";
 import { syncQwen } from "./qwenSync.js";
@@ -14,17 +13,7 @@ export const buildSyncProgram = (
 		yield* _(syncQwen(options));
 	});
 
-const isMainModule = (): boolean => {
-	const entry = process.argv[1];
-
-	if (entry === undefined) {
-		return false;
-	}
-
-	return import.meta.url === pathToFileURL(entry).href;
-};
-
-const parseArgs = (): SyncOptions => {
+export const parseArgs = (): SyncOptions => {
 	const argv = process.argv.slice(2);
 	let result: SyncOptions = { cwd: process.cwd() };
 
@@ -55,9 +44,3 @@ const parseArgs = (): SyncOptions => {
 
 	return result;
 };
-
-if (isMainModule()) {
-	const program = buildSyncProgram(parseArgs());
-
-	Effect.runSync(program);
-}

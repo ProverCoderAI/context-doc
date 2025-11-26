@@ -74,9 +74,6 @@ const resolveSourceDir = (
 
 			return { existing, candidates };
 		}),
-		Effect.tap(({ candidates }) =>
-			Console.log(`Codex source candidates: ${candidates.join(", ")}`),
-		),
 		Effect.flatMap(({ existing, candidates }) =>
 			existing === undefined
 				? Effect.fail(
@@ -204,7 +201,7 @@ export const syncCodex = (
 
 		yield* _(
 			Console.log(
-				`Synced ${relevantFiles.length} dialog files into .knowledge/.codex from ${sourceDir}`,
+				`Codex: copied ${relevantFiles.length} files from ${sourceDir} to ${destinationDir}`,
 			),
 		);
 	}).pipe(
