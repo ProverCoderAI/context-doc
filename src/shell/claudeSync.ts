@@ -1,9 +1,10 @@
 import { Console, Effect, pipe } from "effect";
-import fs from "node:fs";
-import os from "node:os";
-import path from "node:path";
+import * as Fs from "node:fs";
+import * as Os from "node:os";
+import * as Path from "node:path";
 import { copyFilteredFiles, ensureDirectory, syncError } from "./syncShared.js";
-import type { SyncError, SyncOptions } from "./syncTypes.js";
+import type { SyncError } from "./syncTypes.js";
+import type { SyncOptions } from "./syncTypes.js";
 
 const slugFromCwd = (cwd: string): string =>
 	`-${cwd.replace(/^\/+/, "").replace(/\//g, "-")}`;
@@ -16,9 +17,10 @@ const resolveClaudeProjectDir = (
 		Effect.sync(() => {
 			const slug = slugFromCwd(cwd);
 			const base =
-				overrideProjectsRoot ?? path.join(os.homedir(), ".claude", "projects");
-			const candidate = path.join(base, slug);
-			return fs.existsSync(candidate) ? candidate : undefined;
+				overrideProjectsRoot ??
+				Path.join(Os.homedir(), ".claude", "projects");
+			const candidate = Path.join(base, slug);
+			return Fs.existsSync(candidate) ? candidate : undefined;
 		}),
 		Effect.flatMap((found) =>
 			found === undefined
@@ -47,16 +49,16 @@ export const syncClaude = (
 		resolveClaudeProjectDir(options.cwd, options.claudeProjectsRoot),
 		Effect.flatMap((sourceDir) =>
 			pipe(
-				ensureDirectory(path.join(options.cwd, ".knowledge", ".claude")),
+				ensureDirectory(Path.join(options.cwd, ".knowledge", ".claude")),
 				Effect.flatMap(() =>
 					copyClaudeJsonl(
 						sourceDir,
-						path.join(options.cwd, ".knowledge", ".claude"),
+						Path.join(options.cwd, ".knowledge", ".claude"),
 					),
 				),
 				Effect.flatMap((copied) =>
 					Console.log(
-						`Claude: copied ${copied} files from ${sourceDir} to ${path.join(options.cwd, ".knowledge", ".claude")}`,
+						`Claude: copied ${copied} files from ${sourceDir} to ${Path.join(options.cwd, ".knowledge", ".claude")}`,
 					),
 				),
 			),
