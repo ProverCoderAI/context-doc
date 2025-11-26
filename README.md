@@ -1,12 +1,20 @@
 # Knowledge Sync CLI
 
-Command: `npm run sync:knowledge` (or `knowledge-sync` when installed globally) — copies project dialogs into `.knowledge` for both Codex and Qwen.
+Command: `npx @prover-coder-ai/context-doc [flags]` (or `context-doc` when installed globally) — copies project dialogs into `.knowledge` for both Codex and Qwen.
 
 ## Installation (global CLI)
 - Install: `npm install -g @prover-coder-ai/context-doc`
 - Registry page: https://www.npmjs.com/package/@prover-coder-ai/context-doc
-- Run globally: `knowledge-sync [flags]`
+- Run globally: `context-doc [flags]`
+- Ad-hoc (no install): `npx @prover-coder-ai/context-doc [flags]`
 - Local (without global install): `npm run sync:knowledge` or `tsx src/shell/syncKnowledge.ts`
+
+## Usage examples
+- Default (auto-detect sources/destinations): `context-doc`
+- Custom Codex source/destination: `context-doc --source /tmp/project/.codex --dest /tmp/project/.knowledge/.codex`
+- Custom meta root (both Codex/Qwen resolution): `context-doc --meta-root /data/meta`
+- Override project URL: `context-doc --project-url https://github.com/your/repo`
+- Qwen source override: `context-doc --qwen-source /data/qwen/tmp/abcd1234`
 
 ## Flags
 - `--source, -s <path>` — explicit path to `.codex` (Codex source).

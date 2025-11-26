@@ -12,7 +12,7 @@
     "release": "npm run build && npm run lint && npm version patch && npm publish --access public"
   },
   "bin": {
-    "knowledge-sync": "dist/shell/syncKnowledge.js"
+    "context-doc": "dist/shell/syncKnowledge.js"
   },
   "repository": {
     "type": "git",
