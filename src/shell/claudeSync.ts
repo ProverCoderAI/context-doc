@@ -1,6 +1,6 @@
-import * as Fs from "node:fs";
-import * as Os from "node:os";
-import * as Path from "node:path";
+import * as NodeFs from "node:fs";
+import * as NodeOs from "node:os";
+import * as NodePath from "node:path";
 import { Console, Effect, pipe } from "effect";
 import { copyFilteredFiles, ensureDirectory, syncError } from "./syncShared.js";
 import type { SyncError, SyncOptions } from "./syncTypes.js";
@@ -16,9 +16,10 @@ const resolveClaudeProjectDir = (
 		Effect.sync(() => {
 			const slug = slugFromCwd(cwd);
 			const base =
-				overrideProjectsRoot ?? Path.join(Os.homedir(), ".claude", "projects");
-			const candidate = Path.join(base, slug);
-			return Fs.existsSync(candidate) ? candidate : undefined;
+				overrideProjectsRoot ??
+				NodePath.join(NodeOs.homedir(), ".claude", "projects");
+			const candidate = NodePath.join(base, slug);
+			return NodeFs.existsSync(candidate) ? candidate : undefined;
 		}),
 		Effect.flatMap((found) =>
 			found === undefined
