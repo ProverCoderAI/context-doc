@@ -3,8 +3,6 @@ dist/
 build/
 coverage/
 .DS_Store
-.codex/
-.qwen/
 prover-coder-ai-context-doc-*.tgz
 *.log
 *.tsbuildinfo
