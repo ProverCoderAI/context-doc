@@ -40,41 +40,40 @@ const resolveQwenSourceDir = (
 	override?: string,
 	metaRoot?: string,
 ): Effect.Effect<string, SyncError> =>
-	pipe(
-		Effect.sync(() => {
-			const hash = qwenHashFromPath(cwd);
-			const envSource = process.env.QWEN_SOURCE_DIR;
-			const baseFromMeta =
-				metaRoot === undefined
-					? undefined
-					: metaRoot.endsWith(".qwen")
-						? metaRoot
-						: path.join(metaRoot, ".qwen");
-			const homeBase = path.join(os.homedir(), ".qwen");
+	Effect.gen(function* (_) {
+		const hash = qwenHashFromPath(cwd);
+		const envSource = process.env.QWEN_SOURCE_DIR;
+		const baseFromMeta =
+			metaRoot === undefined
+				? undefined
+				: metaRoot.endsWith(".qwen")
+					? metaRoot
+					: path.join(metaRoot, ".qwen");
+		const homeBase = path.join(os.homedir(), ".qwen");
 
-			const candidates = [
-				override,
-				envSource,
-				baseFromMeta ? path.join(baseFromMeta, "tmp", hash) : undefined,
-				path.join(cwd, ".qwen", "tmp", hash),
-				path.join(homeBase, "tmp", hash),
-			].filter((candidate): candidate is string => candidate !== undefined);
+		const candidates = [
+			override,
+			envSource,
+			baseFromMeta ? path.join(baseFromMeta, "tmp", hash) : undefined,
+			path.join(cwd, ".qwen", "tmp", hash),
+			path.join(homeBase, "tmp", hash),
+		].filter((candidate): candidate is string => candidate !== undefined);
 
-			const found = candidates.find((candidate) => fs.existsSync(candidate));
+		const found = candidates.find((candidate) => fs.existsSync(candidate));
 
-			return { found, candidates };
-		}),
-		Effect.flatMap(({ found, candidates }) =>
-			found === undefined
-				? Effect.fail(
-						syncError(
-							".qwen",
-							`Qwen source directory is missing; checked: ${candidates.join(", ")}`,
-						),
-					)
-				: Effect.succeed(found),
-		),
-	);
+		if (found === undefined) {
+			return yield* _(
+				Effect.fail(
+					syncError(
+						".qwen",
+						`Qwen source directory is missing; checked: ${candidates.join(", ")}`,
+					),
+				),
+			);
+		}
+
+		return found;
+	});
 
 export const syncQwen = (
 	options: SyncOptions,
