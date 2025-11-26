@@ -156,7 +156,9 @@ const selectRelevantFiles = (
 // EFFECT: Effect<void, SyncError, never>
 // INVARIANT: ∀f ∈ copiedFiles: linesMatchProject(f, locator)
 // COMPLEXITY: O(n) time / O(n) space, n = |files|
-export const syncCodex = (options: SyncOptions): Effect.Effect<void, SyncError> =>
+export const syncCodex = (
+	options: SyncOptions,
+): Effect.Effect<void, SyncError> =>
 	Effect.gen(function* (_) {
 		const repositoryUrl = yield* _(
 			readRepositoryUrl(options.cwd, options.repositoryUrlOverride),
