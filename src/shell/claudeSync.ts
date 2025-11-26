@@ -1,7 +1,8 @@
-import { Console, Effect, pipe } from "effect";
 import * as Fs from "node:fs";
 import * as Os from "node:os";
 import * as Path from "node:path";
+import { Console, Effect as ClaudeEffect } from "effect";
+import { pipe } from "effect/Function";
 import { copyFilteredFiles, ensureDirectory, syncError } from "./syncShared.js";
 import type { SyncError } from "./syncTypes.js";
 import type { SyncOptions } from "./syncTypes.js";
@@ -14,20 +15,19 @@ const resolveClaudeProjectDir = (
 	overrideProjectsRoot?: string,
 ): Effect.Effect<string, SyncError> =>
 	pipe(
-		Effect.sync(() => {
+		ClaudeEffect.sync(() => {
 			const slug = slugFromCwd(cwd);
 			const base =
-				overrideProjectsRoot ??
-				Path.join(Os.homedir(), ".claude", "projects");
+				overrideProjectsRoot ?? Path.join(Os.homedir(), ".claude", "projects");
 			const candidate = Path.join(base, slug);
 			return Fs.existsSync(candidate) ? candidate : undefined;
 		}),
-		Effect.flatMap((found) =>
+		ClaudeEffect.flatMap((found) =>
 			found === undefined
-				? Effect.fail(
+				? ClaudeEffect.fail(
 						syncError(".claude", "Claude project directory is missing"),
 					)
-				: Effect.succeed(found),
+				: ClaudeEffect.succeed(found),
 		),
 	);
 
@@ -47,23 +47,23 @@ export const syncClaude = (
 ): Effect.Effect<void, SyncError> =>
 	pipe(
 		resolveClaudeProjectDir(options.cwd, options.claudeProjectsRoot),
-		Effect.flatMap((sourceDir) =>
+		ClaudeEffect.flatMap((sourceDir) =>
 			pipe(
 				ensureDirectory(Path.join(options.cwd, ".knowledge", ".claude")),
-				Effect.flatMap(() =>
+				ClaudeEffect.flatMap(() =>
 					copyClaudeJsonl(
 						sourceDir,
 						Path.join(options.cwd, ".knowledge", ".claude"),
 					),
 				),
-				Effect.flatMap((copied) =>
+				ClaudeEffect.flatMap((copied) =>
 					Console.log(
 						`Claude: copied ${copied} files from ${sourceDir} to ${Path.join(options.cwd, ".knowledge", ".claude")}`,
 					),
 				),
 			),
 		),
-		Effect.catchAll((error) =>
+		ClaudeEffect.catchAll((error) =>
 			Console.log(
 				`Claude source not found; skipped syncing Claude dialog files (${error.reason})`,
 			),
