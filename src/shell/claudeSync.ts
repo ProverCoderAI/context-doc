@@ -61,9 +61,9 @@ export const syncClaude = (
 				),
 			),
 		),
-		Effect.catchAll((error) =>
+		Effect.catchAll((error: SyncError) =>
 			Console.log(
-				`Claude source not found; skipped syncing Claude dialog files (${String((error as { reason?: string }).reason ?? error)})`,
+				`Claude source not found; skipped syncing Claude dialog files (${error.reason})`,
 			),
 		),
 	);
