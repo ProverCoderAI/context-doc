@@ -51,6 +51,21 @@ const resolveQwenSourceDir = (
 						? metaRoot
 						: path.join(metaRoot, ".qwen");
 			const homeBase = path.join(os.homedir(), ".qwen");
+			const pickFirstChild = (base?: string): string | undefined => {
+				if (base === undefined) {
+					return undefined;
+				}
+				const tmp = path.join(base, "tmp");
+				if (!fs.existsSync(tmp)) {
+					return undefined;
+				}
+				const firstDir = fs
+					.readdirSync(tmp, { withFileTypes: true })
+					.find((entry) => entry.isDirectory());
+				return firstDir === undefined
+					? undefined
+					: path.join(tmp, firstDir.name);
+			};
 
 			const candidates = [
 				override,
@@ -58,6 +73,9 @@ const resolveQwenSourceDir = (
 				baseFromMeta ? path.join(baseFromMeta, "tmp", hash) : undefined,
 				path.join(cwd, ".qwen", "tmp", hash),
 				path.join(homeBase, "tmp", hash),
+				pickFirstChild(baseFromMeta),
+				pickFirstChild(path.join(cwd, ".qwen")),
+				pickFirstChild(homeBase),
 			];
 
 			return candidates.find(
