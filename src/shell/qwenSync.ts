@@ -71,7 +71,7 @@ const resolveQwenSourceDir = (
 				Effect.fail(
 					syncError(
 						".qwen",
-						`Qwen source directory is missing; checked: ${candidates.join(", ")}`,
+						`Qwen source directory is missing for hash ${hash}`,
 					),
 				),
 			);
@@ -98,11 +98,14 @@ export const syncQwen = (
 				}
 
 				yield* _(ensureDirectory(destination));
+				const qwenRoot = path.dirname(path.dirname(qwenSource));
 				const copiedCount = yield* _(
 					copyDirectoryJsonOnly(qwenSource, destination),
 				);
 				yield* _(
-					Console.log(`Qwen: copied ${copiedCount} files from ${qwenSource} to ${destination}`),
+					Console.log(
+						`Qwen: copied ${copiedCount} files from ${qwenRoot} to ${destination}`,
+					),
 				);
 			}),
 		),
