@@ -46,8 +46,8 @@ const resolveSourceDir = (
 	override?: string,
 	metaRoot?: string,
 ): Effect.Effect<string, SyncError> =>
-	Effect.try({
-		try: () => {
+	pipe(
+		Effect.sync(() => {
 			const envSource = process.env.CODEX_SOURCE_DIR;
 			const metaCandidate =
 				metaRoot === undefined
@@ -63,19 +63,23 @@ const resolveSourceDir = (
 				metaCandidate,
 				localSource,
 				homeSource,
-			];
-			const existing = candidates.find(
-				(candidate) => candidate !== undefined && fs.existsSync(candidate),
-			);
+			].filter((candidate): candidate is string => candidate !== undefined);
 
-			if (existing === undefined) {
-				throw new Error("source .codex not found");
-			}
+			const existing = candidates.find((candidate) => fs.existsSync(candidate));
 
-			return existing;
-		},
-		catch: () => syncError(".codex", "Source .codex directory is missing"),
-	});
+			return { existing, candidates };
+		}),
+		Effect.flatMap(({ existing, candidates }) =>
+			existing === undefined
+				? Effect.fail(
+						syncError(
+							".codex",
+							`Source .codex directory is missing; checked: ${candidates.join(", ")}`,
+						),
+					)
+				: Effect.succeed(existing),
+		),
+	);
 
 const collectJsonlFiles = (
 	root: string,
@@ -171,19 +175,25 @@ export const syncCodex = (
 
 		yield* _(ensureDirectory(destinationDir));
 
-		const locator = buildProjectLocator(repositoryUrl, options.cwd);
-		const allJsonlFiles = yield* _(collectJsonlFiles(sourceDir));
-		const relevantFiles = yield* _(selectRelevantFiles(allJsonlFiles, locator));
+	const locator = buildProjectLocator(repositoryUrl, options.cwd);
+	const allJsonlFiles = yield* _(collectJsonlFiles(sourceDir));
+	const relevantFiles = yield* _(selectRelevantFiles(allJsonlFiles, locator));
 
-		yield* _(
-			Effect.forEach(relevantFiles, (filePath) =>
-				copyRelevantFile(sourceDir, destinationDir, filePath),
-			),
-		);
+	yield* _(
+		Effect.forEach(relevantFiles, (filePath) =>
+			copyRelevantFile(sourceDir, destinationDir, filePath),
+		),
+	);
 
-		yield* _(
+	yield* _(
+		Console.log(
+			`Synced ${relevantFiles.length} dialog files into .knowledge/.codex from ${sourceDir}`,
+		),
+	);
+	}).pipe(
+		Effect.catchAll((error) =>
 			Console.log(
-				`Synced ${relevantFiles.length} dialog files into .knowledge/.codex`,
+				`Codex source not found; skipped syncing Codex dialog files (${error.reason})`,
 			),
-		);
-	});
+		),
+	);

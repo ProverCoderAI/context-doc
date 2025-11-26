@@ -51,21 +51,6 @@ const resolveQwenSourceDir = (
 						? metaRoot
 						: path.join(metaRoot, ".qwen");
 			const homeBase = path.join(os.homedir(), ".qwen");
-			const pickFirstChild = (base?: string): string | undefined => {
-				if (base === undefined) {
-					return undefined;
-				}
-				const tmp = path.join(base, "tmp");
-				if (!fs.existsSync(tmp)) {
-					return undefined;
-				}
-				const firstDir = fs
-					.readdirSync(tmp, { withFileTypes: true })
-					.find((entry) => entry.isDirectory());
-				return firstDir === undefined
-					? undefined
-					: path.join(tmp, firstDir.name);
-			};
 
 			const candidates = [
 				override,
@@ -73,18 +58,20 @@ const resolveQwenSourceDir = (
 				baseFromMeta ? path.join(baseFromMeta, "tmp", hash) : undefined,
 				path.join(cwd, ".qwen", "tmp", hash),
 				path.join(homeBase, "tmp", hash),
-				pickFirstChild(baseFromMeta),
-				pickFirstChild(path.join(cwd, ".qwen")),
-				pickFirstChild(homeBase),
-			];
+			].filter((candidate): candidate is string => candidate !== undefined);
 
-			return candidates.find(
-				(candidate) => candidate !== undefined && fs.existsSync(candidate),
-			);
+			const found = candidates.find((candidate) => fs.existsSync(candidate));
+
+			return { found, candidates };
 		}),
-		Effect.flatMap((found) =>
+		Effect.flatMap(({ found, candidates }) =>
 			found === undefined
-				? Effect.fail(syncError(".qwen", "Qwen source directory is missing"))
+				? Effect.fail(
+						syncError(
+							".qwen",
+							`Qwen source directory is missing; checked: ${candidates.join(", ")}`,
+						),
+					)
 				: Effect.succeed(found),
 		),
 	);
@@ -94,6 +81,9 @@ export const syncQwen = (
 ): Effect.Effect<void, SyncError> =>
 	pipe(
 		resolveQwenSourceDir(options.cwd, options.qwenSourceDir, options.metaRoot),
+		Effect.tap((qwenSource) =>
+			Console.log(`Qwen source resolved: ${qwenSource}`),
+		),
 		Effect.flatMap((qwenSource) =>
 			pipe(
 				ensureDirectory(path.join(options.cwd, ".knowledge", ".qwen")),
@@ -110,7 +100,9 @@ export const syncQwen = (
 				),
 			),
 		),
-		Effect.catchAll(() =>
-			Console.log("Qwen source not found; skipped syncing Qwen dialog files"),
+		Effect.catchAll((error) =>
+			Console.log(
+				`Qwen source not found; skipped syncing Qwen dialog files (${error.reason})`,
+			),
 		),
 	);
