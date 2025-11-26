@@ -1,19 +1,28 @@
 # Knowledge Sync CLI
 
-Command: `npm run sync:knowledge` (or `tsx src/shell/syncKnowledge.ts`) — copies only dialogs that belong to the current project into `.knowledge/.codex`.
+Command: `npm run sync:knowledge` (or `tsx src/shell/syncKnowledge.ts`) — copies project dialogs into `.knowledge` for both Codex and Qwen.
 
 ## Flags
-- `--source, -s <path>` — explicit path to `.codex`.
-- `--dest, -d <path>` — destination root (defaults to `.knowledge/.codex` in the project).
+- `--source, -s <path>` — explicit path to `.codex` (Codex source).
+- `--dest, -d <path>` — Codex destination root (defaults to `.knowledge/.codex`).
 - `--project-url` / `--project-name <url>` — override repository URL (otherwise read from `package.json`).
-- `--meta-root <path>` — path to a meta folder; if it’s not already `.codex`, the tool looks for `<meta-root>/.codex`.
+- `--meta-root <path>` — meta folder root; Codex lookup tries `<meta-root>/.codex`, Qwen lookup tries `<meta-root>/.qwen/tmp/<hash>`.
+- `--qwen-source <path>` — explicit path to Qwen source.
 
-## `.codex` lookup order
-1) `--source` (if provided)  
-2) env `CODEX_SOURCE_DIR`  
-3) `--meta-root` (either the `.codex` itself or `<meta-root>/.codex`)  
-4) project-local `.codex`  
+## Codex lookup order (`.jsonl` filtered by project)
+1) `--source`
+2) env `CODEX_SOURCE_DIR`
+3) `--meta-root` (use if already `.codex` or append `/.codex`)
+4) project-local `.codex`
 5) home `~/.codex`
 
-Only `.jsonl` files whose `git.repository_url` or `cwd` match this project are copied.\
-Copies are placed under `.knowledge/.codex` preserving the directory structure.
+Files: copies only `.jsonl` whose `git.repository_url` or `cwd` match this project into `.knowledge/.codex`, preserving structure.
+
+## Qwen lookup order (`.json` only, no project filter)
+1) `--qwen-source`
+2) env `QWEN_SOURCE_DIR`
+3) `<meta-root>/.qwen/tmp/<hash>`
+4) `<cwd>/.qwen/tmp/<hash>`
+5) `~/.qwen/tmp/<hash>`
+
+Files: copies only `.json` into `.knowledge/.qwen`, preserving structure (directories recreated).

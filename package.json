@@ -11,6 +11,9 @@
     "sync:knowledge": "tsx src/shell/syncKnowledge.ts",
     "release": "npm run build && npm run lint && npm version patch && npm publish --access public"
   },
+  "bin": {
+    "knowledge-sync": "dist/shell/syncKnowledge.js"
+  },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/prover-coder-ai/context-doc.git"

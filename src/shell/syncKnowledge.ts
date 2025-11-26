@@ -1,3 +1,4 @@
+#!/usr/bin/env node
 import { pathToFileURL } from "node:url";
 import { Effect } from "effect";
 import { syncCodex } from "./codexSync.js";
