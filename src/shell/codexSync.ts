@@ -155,6 +155,45 @@ const selectRelevantFiles = (
 		),
 	);
 
+const resolveLocator = (
+	options: SyncOptions,
+): Effect.Effect<ProjectLocator, SyncError> =>
+	pipe(
+		readRepositoryUrl(options.cwd, options.repositoryUrlOverride),
+		Effect.map((repositoryUrl) => buildProjectLocator(repositoryUrl, options.cwd)),
+		Effect.catchAll(() =>
+			Effect.gen(function* (__) {
+				yield* __(
+					Console.log(
+						"Codex repository url missing; falling back to cwd-only match",
+					),
+				);
+				return buildProjectLocator(options.cwd, options.cwd);
+			}),
+		),
+	);
+
+const copyCodexFiles = (
+	sourceDir: string,
+	destinationDir: string,
+	locator: ProjectLocator,
+): Effect.Effect<void, SyncError> =>
+	Effect.gen(function* (_) {
+		yield* _(ensureDirectory(destinationDir));
+		const allJsonlFiles = yield* _(collectJsonlFiles(sourceDir));
+		const relevantFiles = yield* _(selectRelevantFiles(allJsonlFiles, locator));
+		yield* _(
+			Effect.forEach(relevantFiles, (filePath) =>
+				copyRelevantFile(sourceDir, destinationDir, filePath),
+			),
+		);
+		yield* _(
+			Console.log(
+				`Codex: copied ${relevantFiles.length} files from ${sourceDir} to ${destinationDir}`,
+			),
+		);
+	});
+
 // CHANGE: Extract Codex dialog sync into dedicated module for clarity.
 // WHY: Separate Codex-specific shell effects from other sync flows.
 // QUOTE(ТЗ): "вынеси в отдельный файл"
@@ -169,20 +208,7 @@ export const syncCodex = (
 	options: SyncOptions,
 ): Effect.Effect<void, SyncError> =>
 	Effect.gen(function* (_) {
-		const locator = yield* _(
-			readRepositoryUrl(options.cwd, options.repositoryUrlOverride),
-			Effect.map((repositoryUrl) => buildProjectLocator(repositoryUrl, options.cwd)),
-			Effect.catchAll(() =>
-				Effect.gen(function* (__) {
-					yield* __(
-						Console.log(
-							"Codex repository url missing; falling back to cwd-only match",
-						),
-					);
-					return buildProjectLocator(options.cwd, options.cwd);
-				}),
-			),
-		);
+		const locator = yield* _(resolveLocator(options));
 		const sourceDir = yield* _(
 			resolveSourceDir(options.cwd, options.sourceDir, options.metaRoot),
 		);
@@ -198,22 +224,7 @@ export const syncCodex = (
 			return;
 		}
 
-		yield* _(ensureDirectory(destinationDir));
-
-		const allJsonlFiles = yield* _(collectJsonlFiles(sourceDir));
-		const relevantFiles = yield* _(selectRelevantFiles(allJsonlFiles, locator));
-
-		yield* _(
-			Effect.forEach(relevantFiles, (filePath) =>
-				copyRelevantFile(sourceDir, destinationDir, filePath),
-			),
-		);
-
-		yield* _(
-			Console.log(
-				`Codex: copied ${relevantFiles.length} files from ${sourceDir} to ${destinationDir}`,
-			),
-		);
+		yield* _(copyCodexFiles(sourceDir, destinationDir, locator));
 	}).pipe(
 		Effect.catchAll((error) =>
 			Console.log(
