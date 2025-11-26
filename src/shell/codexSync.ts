@@ -169,8 +169,19 @@ export const syncCodex = (
 	options: SyncOptions,
 ): Effect.Effect<void, SyncError> =>
 	Effect.gen(function* (_) {
-		const repositoryUrl = yield* _(
+		const locator = yield* _(
 			readRepositoryUrl(options.cwd, options.repositoryUrlOverride),
+			Effect.map((repositoryUrl) => buildProjectLocator(repositoryUrl, options.cwd)),
+			Effect.catchAll(() =>
+				Effect.gen(function* (__) {
+					yield* __(
+						Console.log(
+							"Codex repository url missing; falling back to cwd-only match",
+						),
+					);
+					return buildProjectLocator(options.cwd, options.cwd);
+				}),
+			),
 		);
 		const sourceDir = yield* _(
 			resolveSourceDir(options.cwd, options.sourceDir, options.metaRoot),
@@ -189,7 +200,6 @@ export const syncCodex = (
 
 		yield* _(ensureDirectory(destinationDir));
 
-		const locator = buildProjectLocator(repositoryUrl, options.cwd);
 		const allJsonlFiles = yield* _(collectJsonlFiles(sourceDir));
 		const relevantFiles = yield* _(selectRelevantFiles(allJsonlFiles, locator));
 
