@@ -48,16 +48,16 @@ export const syncClaude = (
 		resolveClaudeProjectDir(options.cwd, options.claudeProjectsRoot),
 		Effect.flatMap((sourceDir) =>
 			pipe(
-				ensureDirectory(Path.join(options.cwd, ".knowledge", ".claude")),
+				ensureDirectory(NodePath.join(options.cwd, ".knowledge", ".claude")),
 				Effect.flatMap(() =>
 					copyClaudeJsonl(
 						sourceDir,
-						Path.join(options.cwd, ".knowledge", ".claude"),
+						NodePath.join(options.cwd, ".knowledge", ".claude"),
 					),
 				),
 				Effect.flatMap((copied) =>
 					Console.log(
-						`Claude: copied ${copied} files from ${sourceDir} to ${Path.join(options.cwd, ".knowledge", ".claude")}`,
+						`Claude: copied ${copied} files from ${sourceDir} to ${NodePath.join(options.cwd, ".knowledge", ".claude")}`,
 					),
 				),
 			),

@@ -1,7 +1,7 @@
 import fs from "node:fs";
 import path from "node:path";
-import { Effect } from "effect";
-import type { SyncError } from "./syncTypes.js";
+import { Console, Effect } from "effect";
+import type { SyncError, SyncOptions, SyncSource } from "./syncTypes.js";
 
 export const syncError = (pathValue: string, reason: string): SyncError => ({
 	_tag: "SyncError",
@@ -19,6 +19,44 @@ export const ensureDirectory = (
 		catch: () =>
 			syncError(directory, "Cannot create destination directory structure"),
 	});
+
+export const runSyncSource = (
+	source: SyncSource,
+	options: SyncOptions,
+): Effect.Effect<void, SyncError> =>
+	pipe(
+		source.resolveSource(options),
+		Effect.flatMap((resolvedSource) => {
+			const destination = path.join(
+				options.cwd,
+				".knowledge",
+				source.destSubdir,
+			);
+
+			if (path.resolve(resolvedSource) === path.resolve(destination)) {
+				return Console.log(
+					`${source.name}: source equals destination; skipping copy to avoid duplicates`,
+				);
+			}
+
+			return pipe(
+				ensureDirectory(destination),
+				Effect.flatMap(() =>
+					source.copy(resolvedSource, destination, options),
+				),
+				Effect.flatMap((copied) =>
+					Console.log(
+						`${source.name}: copied ${copied} files from ${resolvedSource} to ${destination}`,
+					),
+				),
+			);
+		}),
+		Effect.catchAll((error: SyncError) =>
+			Console.log(
+				`${source.name}: source not found; skipped syncing (${error.reason})`,
+			),
+		),
+	);
 
 export const copyFilteredFiles = (
 	sourceRoot: string,
