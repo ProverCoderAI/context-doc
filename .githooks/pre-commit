@@ -9,3 +9,6 @@
 # COMPLEXITY: O(1) time/space aside from command execution cost
 set -eu
 npx @prover-coder-ai/context-doc context-doc
+if [ -d ".knowledge" ]; then
+  git add -A .knowledge
+fi
