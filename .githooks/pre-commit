@@ -1,0 +1,11 @@
+#!/usr/bin/env sh
+# CHANGE: ensure every commit runs context-doc verification
+# WHY: formalize invariant that commits are accompanied by regenerated context documentation
+# QUOTE(ТЗ): "Можешь настроить на любой комит что бы он вызывал команду: npx @prover-coder-ai/context-doc context-doc"
+# REF: user-request-pre-commit
+# FORMAT THEOREM: ∀c ∈ Commits: preCommit(c) → executed(c, contextDocCommand)
+# PURITY: SHELL
+# INVARIANT: context-doc executes successfully before commit is allowed
+# COMPLEXITY: O(1) time/space aside from command execution cost
+set -eu
+npx @prover-coder-ai/context-doc context-doc

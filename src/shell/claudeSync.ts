@@ -3,8 +3,7 @@ import * as Os from "node:os";
 import * as Path from "node:path";
 import { Console, Effect, pipe } from "effect";
 import { copyFilteredFiles, ensureDirectory, syncError } from "./syncShared.js";
-import type { SyncError } from "./syncTypes.js";
-import type { SyncOptions } from "./syncTypes.js";
+import type { SyncError, SyncOptions } from "./syncTypes.js";
 
 const slugFromCwd = (cwd: string): string =>
 	`-${cwd.replace(/^\/+/, "").replace(/\//g, "-")}`;
