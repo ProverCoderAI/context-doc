@@ -1,5 +1,5 @@
 {
-  "name": "@ProverCoderAI/context-doc",
+  "name": "@prover-coder-ai/context-doc",
   "version": "1.0.1",
   "description": "",
   "type": "module",
@@ -13,15 +13,26 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/ProverCoderAI/context-doc.git"
+    "url": "git+https://github.com/prover-coder-ai/context-doc.git"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/ProverCoderAI/context-doc/issues"
+    "url": "https://github.com/prover-coder-ai/context-doc/issues"
   },
-  "homepage": "https://github.com/ProverCoderAI/context-doc#readme",
+  "homepage": "https://github.com/prover-coder-ai/context-doc#readme",
+  "files": [
+    "dist",
+    "src",
+    "doc",
+    "README.md",
+    "tsconfig.build.json",
+    "vitest.config.ts"
+  ],
+  "publishConfig": {
+    "access": "public"
+  },
   "dependencies": {
     "@effect/schema": "^0.75.5",
     "effect": "^3.19.6",
