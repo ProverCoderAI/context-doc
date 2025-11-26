@@ -1,8 +1,7 @@
 import * as Fs from "node:fs";
 import * as Os from "node:os";
 import * as Path from "node:path";
-import { Console, Effect as ClaudeEffect } from "effect";
-import { pipe } from "effect/Function";
+import { Console, Effect, pipe } from "effect";
 import { copyFilteredFiles, ensureDirectory, syncError } from "./syncShared.js";
 import type { SyncError } from "./syncTypes.js";
 import type { SyncOptions } from "./syncTypes.js";
@@ -15,19 +14,19 @@ const resolveClaudeProjectDir = (
 	overrideProjectsRoot?: string,
 ): Effect.Effect<string, SyncError> =>
 	pipe(
-		ClaudeEffect.sync(() => {
+		Effect.sync(() => {
 			const slug = slugFromCwd(cwd);
 			const base =
 				overrideProjectsRoot ?? Path.join(Os.homedir(), ".claude", "projects");
 			const candidate = Path.join(base, slug);
 			return Fs.existsSync(candidate) ? candidate : undefined;
 		}),
-		ClaudeEffect.flatMap((found) =>
+		Effect.flatMap((found) =>
 			found === undefined
-				? ClaudeEffect.fail(
+				? Effect.fail(
 						syncError(".claude", "Claude project directory is missing"),
 					)
-				: ClaudeEffect.succeed(found),
+				: Effect.succeed(found),
 		),
 	);
 
@@ -47,25 +46,25 @@ export const syncClaude = (
 ): Effect.Effect<void, SyncError> =>
 	pipe(
 		resolveClaudeProjectDir(options.cwd, options.claudeProjectsRoot),
-		ClaudeEffect.flatMap((sourceDir) =>
+		Effect.flatMap((sourceDir) =>
 			pipe(
 				ensureDirectory(Path.join(options.cwd, ".knowledge", ".claude")),
-				ClaudeEffect.flatMap(() =>
+				Effect.flatMap(() =>
 					copyClaudeJsonl(
 						sourceDir,
 						Path.join(options.cwd, ".knowledge", ".claude"),
 					),
 				),
-				ClaudeEffect.flatMap((copied) =>
+				Effect.flatMap((copied) =>
 					Console.log(
 						`Claude: copied ${copied} files from ${sourceDir} to ${Path.join(options.cwd, ".knowledge", ".claude")}`,
 					),
 				),
 			),
 		),
-		ClaudeEffect.catchAll((error) =>
+		Effect.catchAll((error) =>
 			Console.log(
-				`Claude source not found; skipped syncing Claude dialog files (${error.reason})`,
+				`Claude source not found; skipped syncing Claude dialog files (${String((error as { reason?: string }).reason ?? error)})`,
 			),
 		),
 	);
