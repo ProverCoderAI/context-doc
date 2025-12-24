@@ -1,14 +1,14 @@
 # context-doc
 
-Синхронизирует историю разговоров с AI ассистентами (Claude, Codex, Qwen) в папку `.knowledge` вашего проекта.
+Syncs AI assistant conversation history (Claude, Codex, Qwen) to your project's `.knowledge` folder.
 
-## Использование
+## Usage
 
 ```bash
 npx @prover-coder-ai/context-doc
 ```
 
-Пример:
+Example:
 ```
 user@arch ~/effect-template (main)> npx @prover-coder-ai/context-doc
 Claude: source not found; skipped syncing (Claude project directory is missing)
