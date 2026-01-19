@@ -2,9 +2,9 @@ node_modules/
 dist/
 build/
 coverage/
-.DS_Store
-prover-coder-ai-context-doc-*.tgz
-*.log
-*.tsbuildinfo
-/.eslintcache
-.vscode/
+packages/*/dist/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+reports/

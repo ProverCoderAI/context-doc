@@ -1,62 +1,48 @@
 {
-  "name": "@prover-coder-ai/context-doc",
-  "version": "1.0.12",
-  "description": "",
-  "type": "module",
+  "name": "effect-template-workspace",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Monorepo workspace for effect-template",
+  "packageManager": "pnpm@10.28.0",
+  "workspaces": [
+    "packages/*"
+  ],
   "scripts": {
-    "start": "tsx src/main.ts",
-    "build": "tsc -p tsconfig.build.json",
-    "lint": "npx --no-install @ton-ai-core/vibecode-linter src/",
-    "test": "npx --no-install @ton-ai-core/vibecode-linter tests/ && vitest run --passWithNoTests",
-    "prepare": "git config core.hooksPath .githooks && chmod +x .githooks/pre-commit",
-    "sync:knowledge": "npm run build && PKG=prover-coder-ai-context-doc-$(node -p \"require('./package.json').version\").tgz && rm -f \"$PKG\" && npm pack >/dev/null && npx -y -p \"./$PKG\" context-doc",
-    "release": "npm run lint && npm run build && npm version patch && npm publish --access public"
+    "build": "pnpm --filter @effect-template/app build",
+    "check": "pnpm --filter @effect-template/app check",
+    "changeset": "changeset",
+    "changeset-publish": "node -e \"if (!process.env.NPM_TOKEN) { console.log('Skipping publish: NPM_TOKEN is not set'); process.exit(0); }\" && changeset publish",
+    "changeset-version": "changeset version",
+    "dev": "pnpm --filter @effect-template/app dev",
+    "lint": "pnpm --filter @effect-template/app lint",
+    "lint:tests": "pnpm --filter @effect-template/app lint:tests",
+    "lint:effect": "pnpm --filter @effect-template/app lint:effect",
+    "test": "pnpm --filter @effect-template/app test",
+    "typecheck": "pnpm --filter @effect-template/app typecheck",
+    "start": "pnpm --filter @effect-template/app start"
   },
-  "bin": {
-    "context-doc": "dist/shell/cli.js"
+  "devDependencies": {
+    "@changesets/changelog-github": "^0.5.2",
+    "@changesets/cli": "^2.29.8"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/prover-coder-ai/context-doc.git"
+    "url": "git+https://github.com/ProverCoderAI/effect-template.git"
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
   "bugs": {
-    "url": "https://github.com/prover-coder-ai/context-doc/issues"
+    "url": "https://github.com/ProverCoderAI/effect-template/issues"
   },
-  "homepage": "https://github.com/prover-coder-ai/context-doc#readme",
-  "files": [
-    "dist",
-    "src",
-    "doc",
-    "README.md",
-    "tsconfig.build.json",
-    "vitest.config.ts"
-  ],
-  "publishConfig": {
-    "access": "public"
-  },
-  "dependencies": {
-    "@effect/schema": "^0.75.5",
-    "effect": "^3.19.6",
-    "ts-morph": "^27.0.2",
-    "ts-pattern": "^5.9.0",
-    "vite-tsconfig-paths": "^5.1.4"
-  },
-  "devDependencies": {
-    "@biomejs/biome": "^2.3.7",
-    "@eslint-community/eslint-plugin-eslint-comments": "^4.5.0",
-    "@eslint/js": "^9.39.1",
-    "@ton-ai-core/eslint-plugin-suggest-members": "^1.6.17",
-    "@ton-ai-core/vibecode-linter": "^1.0.6",
-    "@types/node": "^24.10.1",
-    "eslint": "^9.39.1",
-    "eslint-plugin-vitest": "^0.5.4",
-    "globals": "^16.5.0",
-    "tsx": "^4.20.6",
-    "typescript": "^5.9.3",
-    "typescript-eslint": "^8.48.0",
-    "vitest": "^4.0.14"
+  "homepage": "https://github.com/ProverCoderAI/effect-template#readme",
+  "license": "ISC",
+  "pnpm": {
+    "ignoredBuiltDependencies": [
+      "esbuild",
+      "node-pty"
+    ],
+    "onlyBuiltDependencies": [
+      "@parcel/watcher",
+      "msgpackr-extract",
+      "unrs-resolver"
+    ]
   }
 }
