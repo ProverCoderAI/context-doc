@@ -26,6 +26,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         shell: bash
+        working-directory: packages/app
         run: |
           set +e
           pnpx pkg-pr-new@0.0.24 publish --pnpm --comment=off
