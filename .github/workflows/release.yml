@@ -48,6 +48,19 @@ jobs:
             'chore: automated version bump' \
             > "$CHANGESET_FILE"
           echo "has_changeset=true" >> "$GITHUB_OUTPUT"
+      - name: Detect npm token
+        id: npm_token
+        if: steps.auto_changeset.outputs.has_changeset == 'true' && github.actor != 'github-actions[bot]'
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [ -n "${NPM_TOKEN:-}" ]; then
+            echo "available=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "available=false" >> "$GITHUB_OUTPUT"
+          fi
+        env:
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
       - name: Version packages
         if: steps.auto_changeset.outputs.has_changeset == 'true' && github.actor != 'github-actions[bot]'
         run: pnpm changeset version
@@ -92,7 +105,7 @@ jobs:
           git tag -a "$TAG" -m "$TAG"
           git push origin "$TAG"
       - name: Configure npm auth
-        if: steps.auto_changeset.outputs.has_changeset == 'true' && github.actor != 'github-actions[bot]' && secrets.NPM_TOKEN != ''
+        if: steps.auto_changeset.outputs.has_changeset == 'true' && github.actor != 'github-actions[bot]' && steps.npm_token.outputs.available == 'true'
         shell: bash
         run: |
           set -euo pipefail
@@ -100,7 +113,7 @@ jobs:
         env:
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
       - name: Publish
-        if: steps.auto_changeset.outputs.has_changeset == 'true' && github.actor != 'github-actions[bot]' && secrets.NPM_TOKEN != ''
+        if: steps.auto_changeset.outputs.has_changeset == 'true' && github.actor != 'github-actions[bot]' && steps.npm_token.outputs.available == 'true'
         shell: bash
         run: |
           set -euo pipefail
