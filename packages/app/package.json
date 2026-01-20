@@ -1,6 +1,6 @@
 {
   "name": "@prover-coder-ai/context-doc",
-  "version": "1.0.1",
+  "version": "1.0.12",
   "description": "Minimal Vite-powered TypeScript console starter using Effect",
   "main": "dist/main.js",
   "bin": {
@@ -38,6 +38,9 @@
     "url": "https://github.com/ProverCoderAI/context-doc/issues"
   },
   "homepage": "https://github.com/ProverCoderAI/context-doc#readme",
+  "publishConfig": {
+    "access": "public"
+  },
   "packageManager": "pnpm@10.28.0",
   "dependencies": {
     "@effect/cli": "^0.73.0",
