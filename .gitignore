@@ -8,3 +8,5 @@ yarn-debug.log*
 yarn-error.log*
 pnpm-debug.log*
 reports/
+packages/app/effect-template-app-1.0.0.tgz
+packages/app/prover-coder-ai-context-doc-1.0.0.tgz
