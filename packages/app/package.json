@@ -6,6 +6,11 @@
   "bin": {
     "context-doc": "bin/context-doc.js"
   },
+  "files": [
+    "dist",
+    "bin",
+    "README.md"
+  ],
   "directories": {
     "doc": "doc"
   },
@@ -16,6 +21,7 @@
     "lint:tests": "npx @ton-ai-core/vibecode-linter tests/",
     "lint:effect": "npx eslint --config eslint.effect-ts-check.config.mjs .",
     "check": "pnpm run typecheck",
+    "prepack": "pnpm run build",
     "prestart": "pnpm run build",
     "start": "node dist/main.js -- --project-root ../..",
     "test": "pnpm run lint:tests && vitest run",
