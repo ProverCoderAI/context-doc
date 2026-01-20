@@ -23,12 +23,22 @@ jobs:
         run: pnpm build
       - name: Create snapshot
         id: snapshot
-        continue-on-error: true
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: pnpx pkg-pr-new@0.0.24 publish --pnpm --comment=off
+        shell: bash
+        run: |
+          set +e
+          pnpx pkg-pr-new@0.0.24 publish --pnpm --comment=off
+          STATUS=$?
+          if [ $STATUS -eq 0 ]; then
+            echo "success=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "success=false" >> "$GITHUB_OUTPUT"
+            echo "pkg-pr-new failed (likely app not installed); falling back to artifacts."
+          fi
+          exit 0
       - name: Fallback snapshot artifacts
-        if: steps.snapshot.outcome != 'success'
+        if: steps.snapshot.outputs.success != 'true'
         shell: bash
         run: |
           set -euo pipefail
@@ -36,7 +46,7 @@ jobs:
           cd packages/app
           npm pack --silent --pack-destination ../../artifacts
       - name: Upload snapshot artifacts
-        if: steps.snapshot.outcome != 'success'
+        if: steps.snapshot.outputs.success != 'true'
         uses: actions/upload-artifact@v4
         with:
           name: context-doc-snapshot
