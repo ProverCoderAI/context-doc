@@ -8,18 +8,18 @@
     "packages/*"
   ],
   "scripts": {
-    "build": "pnpm --filter @effect-template/app build",
-    "check": "pnpm --filter @effect-template/app check",
+    "build": "pnpm --filter @prover-coder-ai/context-doc build",
+    "check": "pnpm --filter @prover-coder-ai/context-doc check",
     "changeset": "changeset",
     "changeset-publish": "node -e \"if (!process.env.NPM_TOKEN) { console.log('Skipping publish: NPM_TOKEN is not set'); process.exit(0); }\" && changeset publish",
     "changeset-version": "changeset version",
-    "dev": "pnpm --filter @effect-template/app dev",
-    "lint": "pnpm --filter @effect-template/app lint",
-    "lint:tests": "pnpm --filter @effect-template/app lint:tests",
-    "lint:effect": "pnpm --filter @effect-template/app lint:effect",
-    "test": "pnpm --filter @effect-template/app test",
-    "typecheck": "pnpm --filter @effect-template/app typecheck",
-    "start": "pnpm --filter @effect-template/app start"
+    "dev": "pnpm --filter @prover-coder-ai/context-doc dev",
+    "lint": "pnpm --filter @prover-coder-ai/context-doc lint",
+    "lint:tests": "pnpm --filter @prover-coder-ai/context-doc lint:tests",
+    "lint:effect": "pnpm --filter @prover-coder-ai/context-doc lint:effect",
+    "test": "pnpm --filter @prover-coder-ai/context-doc test",
+    "typecheck": "pnpm --filter @prover-coder-ai/context-doc typecheck",
+    "start": "pnpm --filter @prover-coder-ai/context-doc start"
   },
   "devDependencies": {
     "@changesets/changelog-github": "^0.5.2",
