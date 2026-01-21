@@ -90,7 +90,13 @@ jobs:
           if [ -z "${BRANCH}" ]; then
             BRANCH="main"
           fi
-          git push origin "HEAD:${BRANCH}"
+          git fetch origin "${BRANCH}"
+          git rebase "origin/${BRANCH}"
+          if ! git push origin "HEAD:${BRANCH}"; then
+            git fetch origin "${BRANCH}"
+            git rebase "origin/${BRANCH}"
+            git push origin "HEAD:${BRANCH}"
+          fi
       - name: Tag release
         if: steps.auto_changeset.outputs.has_changeset == 'true' && github.actor != 'github-actions[bot]'
         shell: bash
