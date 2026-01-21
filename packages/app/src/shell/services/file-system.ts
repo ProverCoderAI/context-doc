@@ -1,3 +1,4 @@
+import type { PlatformError as PlatformErrorType } from "@effect/platform/Error"
 import * as FileSystem from "@effect/platform/FileSystem"
 import * as Path from "@effect/platform/Path"
 import { Context, Effect, Layer, pipe } from "effect"
@@ -58,6 +59,28 @@ const toDirectoryEntry = (
   kind: entryKindFromInfo(info)
 })
 
+const missingEntry = (
+  path: Path.Path,
+  entryPath: string
+): DirectoryEntry => ({
+  name: path.basename(entryPath),
+  path: entryPath,
+  kind: "other"
+})
+
+const isNotFoundError = (error: PlatformErrorType): boolean =>
+  error._tag === "SystemError" && error.reason === "NotFound"
+
+// CHANGE: tolerate missing directory entries while traversing sources
+// WHY: broken symlinks should not abort sync traversal
+// QUOTE(TZ): n/a
+// REF: user-2026-01-21-broken-symlink
+// SOURCE: n/a
+// FORMAT THEOREM: forall e: notFound(e) -> ignored(e)
+// PURITY: SHELL
+// EFFECT: Effect<DirectoryEntry, SyncError, FileSystem>
+// INVARIANT: NotFound entries are classified as kind="other"
+// COMPLEXITY: O(1)/O(1)
 const readEntry = (
   fs: FileSystem.FileSystem,
   path: Path.Path,
@@ -66,6 +89,7 @@ const readEntry = (
   pipe(
     fs.stat(entryPath),
     Effect.map((info) => toDirectoryEntry(path, entryPath, info)),
+    Effect.catchIf(isNotFoundError, () => Effect.succeed(missingEntry(path, entryPath))),
     Effect.mapError(() => syncError(entryPath, "Cannot read directory entry"))
   )
 

@@ -45,7 +45,15 @@ const packCli = Effect.gen(function*(_) {
     Command.make("npm", "pack", "--silent", "--pack-destination", packDir),
     Command.workingDirectory(appDir)
   )
-  const tarballName = (yield* _(runCommandOutput(pack))).trim()
+  const packOutput = yield* _(runCommandOutput(pack))
+  const packLines = packOutput
+    .split("\n")
+    .map((line) => line.trim())
+    .filter((line) => line.length > 0)
+  const tarballName = packLines.at(-1)
+  if (tarballName === undefined) {
+    return yield* _(Effect.fail(new Error("Packed tarball name not found in npm output")))
+  }
   const tarballPath = path.join(packDir, tarballName)
   const tarballSpec = `file:${tarballPath}`
 
