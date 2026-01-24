@@ -1,5 +1,11 @@
 # @prover-coder-ai/context-doc
 
+## 1.0.24
+
+### Patch Changes
+
+- chore: automated version bump
+
 ## 1.0.23
 
 ### Patch Changes
