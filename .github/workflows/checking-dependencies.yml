@@ -19,11 +19,11 @@ jobs:
           cache: pnpm
 
       - run: pnpm install --frozen-lockfile
-      - run: pnpm -C packages/eslint-template build
+      - run: pnpm -C packages/app build
 
       - name: Dist deps prune (lint)
         run: |
           pnpm dlx @prover-coder-ai/dist-deps-prune scan \
-            --package ./packages/eslint-template/package.json \
+            --package ./packages/app/package.json \
             --prune-dev true \
             --silent
