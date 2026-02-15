@@ -1,6 +1,6 @@
 {
   "name": "@prover-coder-ai/context-doc",
-  "version": "1.0.25",
+  "version": "1.0.26",
   "description": "Minimal Vite-powered TypeScript console starter using Effect",
   "main": "dist/main.js",
   "bin": {
